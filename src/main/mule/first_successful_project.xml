@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="9859255e-43b3-447c-a727-085a71d4c222" >
+		<db:my-sql-connection host="localhost" port="3306" user="root" password="2029" />
+	</db:config>
+	<db:config name="Database_Config1" doc:name="Database Config" doc:id="ab798a27-08ec-47c9-9111-2d2a4839558e" >
+		<db:my-sql-connection host="localhost" port="3306" user="root" password="2029" />
+	</db:config>
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="e5eb14dd-d055-47b0-aa6c-7793cfd4866d" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<db:config name="Database_Config2" doc:name="Database Config" doc:id="940192f8-7140-4cd6-99f1-824fd5906c51" >
+		<db:my-sql-connection host="localhost" port="3306" user="root" password="2029" />
+	</db:config>
+	<flow name="first_successful_projectFlow" doc:id="89f9f18f-48e5-4838-9dc2-038403d19b79" >
+		<http:listener doc:name="Listener" doc:id="099b6bb3-27ab-4576-8633-c08c6a8e604a" path="/successful" config-ref="HTTP_Listener_config"/>
+		<first-successful doc:name="First Successful" doc:id="8d038168-a030-4a3f-b78e-53856c0ea686" >
+			<route >
+				<db:select doc:name="Select" doc:id="3cb0a5df-bdc4-4c1e-a4bd-d6be612ac6c7" config-ref="Database_Config2">
+					<db:sql ><![CDATA[SELECT * FROM world.countrylanguage]]></db:sql>
+				</db:select>
+			</route>
+			<route >
+				<db:select doc:name="Select" doc:id="8e39d638-4cd0-4b0b-bf77-93c904f33fb0" config-ref="Database_Config">
+					<db:sql ><![CDATA[SELECT * FROM world.city]]></db:sql>
+				</db:select>
+			</route>
+			<route >
+				<db:select doc:name="Select" doc:id="2f529bf5-5bfb-4a0c-9801-d212b8633385" config-ref="Database_Config1">
+					<db:sql ><![CDATA[SELECT * FROM world.country]]></db:sql>
+				</db:select>
+			</route>
+		</first-successful>
+		<ee:transform doc:name="Transform Message" doc:id="298d05f9-8970-476e-86cd-a9fa574fca9d">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+	</flow>
+</mule>
